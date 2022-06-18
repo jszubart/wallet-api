@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  web:
+    container_name: wallet_web
+    volumes:
+      - ./:/var/www
+    build:
+      context: 'docker/nginx'
+    ports:
+      - "8080:80"
+    networks:
+      - symfony
+
+  php:
+    container_name: wallet_php
+    restart: always
+    build:
+      context: 'docker/php'
+    volumes:
+      - ./:/var/www
+    working_dir: /var/www
+    networks:
+      - symfony
+
+  db:
+    container_name: wallet_db
+    image: mysql:latest
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    networks:
+      - symfony
+
+  phpmyadmin:
+    container_name: wallet_phpmyadmin
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - "8081:80"
+    networks:
+      - symfony
+    depends_on:
+      - db
+
+networks:
+  symfony:
